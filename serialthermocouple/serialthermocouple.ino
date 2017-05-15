@@ -17,7 +17,7 @@ const int8_t thermoCLK = 6;
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 int vccPin = 3;
 int gndPin = 2;
-double t_read;
+double G_t_read;
 double buffer[10];
 int i;
 Stopwatch time_temp_reader(200000); // microseconds
@@ -25,13 +25,8 @@ Stopwatch time_temp_reader(200000); // microseconds
 // Even with fast serial, still seems to bork at 10 Hz. 
 
 void get_and_print_temp(void) {
-   t_read = thermocouple.readCelsius();
-   buffer[i] = t_read;
-   i++;
-   i = i % 5;
-   if (i % 5 == 0) {
-     Serial.println(buffer[0]); // testing to see if it's just serial interrupts slowing things down. Apparently not. 
-   }
+   G_t_read = thermocouple.readCelsius();
+   Serial.println(G_t_read); // testing to see if it's just serial interrupts slowing things down. Apparently not. 
    
    //Serial.println(time_temp_reader.last_time());
    //Serial.println(micros());
@@ -40,7 +35,7 @@ void get_and_print_temp(void) {
 
   
 void setup() {
-  Serial.begin(115200); // 9600 is stable (obviously). 115200 seems to be stable. 
+  Serial.begin(57600); // 9600 is stable (obviously). 115200 seems to be stable though a bit dodgy at times. 
   // use Arduino pins 
   pinMode(vccPin, OUTPUT); digitalWrite(vccPin, HIGH);
   pinMode(gndPin, OUTPUT); digitalWrite(gndPin, LOW);

@@ -5,6 +5,7 @@ class Stopwatch {
     private:
      unsigned long timer;
      unsigned long tDelay;
+     bool profiling;
     public:
      Stopwatch(unsigned long tDelay_us);
      void set_delay(unsigned long tDelay_us);

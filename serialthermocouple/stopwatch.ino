@@ -3,6 +3,7 @@
 Stopwatch::Stopwatch(unsigned long tDelay_us) {
     tDelay = tDelay_us;
     timer = micros();
+    profiling = true;
 }
 
 bool Stopwatch::is_ready(void) {
@@ -24,6 +25,7 @@ unsigned long Stopwatch::last_time(void) {
     bool ready = is_ready();
 
     if (ready) {
+        if (profiling) { Serial.println(micros() - timer); }
         timer = micros();
         start_routine();
     }
