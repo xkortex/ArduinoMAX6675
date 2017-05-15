@@ -29,7 +29,7 @@ MAX6675::MAX6675(int8_t SCLK, int8_t CS, int8_t MISO) {
 }
 double MAX6675::readCelsius(void) {
   /* Read the temperature from the SPI interface
-  Currently runs at about 375 microseconds per call (2.6 KHz)
+  Currently runs at about 375 microseconds per call (2.6 KHz). Not bad, but theoretical is near 1 MHz. 
   Using #defines we get to about 360 microseconds. Not a great improvement. 
   Need to do low level magic to get faster
   */
