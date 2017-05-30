@@ -6,6 +6,7 @@
 #elif defined(ESP8266)
   #include <pgmspace.h>
 #endif
+#include <SPI.h>
 #include <util/delay.h>
 #include <stdlib.h>
 #include "max6675a.h"
@@ -34,30 +35,29 @@ double MAX6675::readCelsius(void) {
   Need to do low level magic to get faster
   */
   //unsigned long start = micros();        // profiling
-  uint16_t v;
+  uint16_t temp_reading;
+  double tempC;
 
+ // stop any conversion process
   digitalWrite(P_CS, LOW);
-  delaym();
+  delayMicroseconds(5000);
 
-  v = spiread();
-  v <<= 8;
-  v |= spiread();
 
-  digitalWrite(P_CS, HIGH);
 
-  if (v & 0x4) {
-    // uh oh, no thermocouple attached!
-    tempC = NAN; 
-    //return -100;
+  temp_reading = SPI.transfer(0xff) << 8;  
+  temp_reading += SPI.transfer(0xff);  
+
+  if (temp_reading & 0x4) {
+    tempC = -1; // Failed / NoCOnnection Error
   }
 
-  v >>= 3;
+  temp_reading >>= 3; // Don't fully understand this bitshift, must be a MAX thing
+  tempC = temp_reading * 0.25;
 
-  tempC = v*0.25;
   //Serial.print("us ");                  // profiling
   //Serial.print(micros() - start);
   //Serial.print("\n");
-  return tempC;
+  return tempC; //Convert to Degc
 }
 
 byte MAX6675::spiread(void) { 

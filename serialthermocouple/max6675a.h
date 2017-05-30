@@ -21,4 +21,5 @@ class MAX6675 {
   uint8_t spiread(void);
 };
 
+
 #endif

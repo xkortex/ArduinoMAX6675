@@ -3,7 +3,7 @@
 Stopwatch::Stopwatch(unsigned long tDelay_us) {
     tDelay = tDelay_us;
     timer = micros();
-    profiling = true;
+    profiling = false;
 }
 
 bool Stopwatch::is_ready(void) {
