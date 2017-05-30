@@ -14,11 +14,16 @@
 const int8_t thermoDO = 12; // is MISO
 const int8_t thermoCS = 10;
 const int8_t thermoCLK = 13;
+const int8_t vccPin = 3;
+const int8_t gndPin = 2;
+const int8_t P_LGND = 4; // LED ground
+const int8_t P_RED = 5;
+const int8_t P_GRN = 6;
+const int8_t P_BLU = 7;
 
 // Globals
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-int vccPin = 3;
-int gndPin = 2;
+
 volatile double G_t_read;
 volatile double G_t_filt;
 double IIR_LAMBDA;
@@ -26,14 +31,15 @@ double buffer[10];
 int i;
 unsigned long start, now, dt, time_to_read_temp;
 Stopwatch time_temp_reader(200000); // microseconds - MAX6675 specifies Conversion Time: TYPICAL: 0.17 s MAXIMUM: 0.22 s
-Stopwatch time_temp_printer(200000); // microseconds
+Stopwatch time_temp_printer(500000); // microseconds
 
 /* By specification, the MAX6675 can only operate at a maximum read rate of about 5 Hz
 */
 
 void get_temp(void) {
   start = micros();
-  G_t_read = GetTemperature();
+//  G_t_read = GetTemperature();
+  G_t_read = thermocouple.readCelsius();
   now = micros();
   dt = now - start;
   G_t_filt = IIR_LAMBDA * G_t_read + (1 - IIR_LAMBDA) * G_t_filt; // IIR low pass filter
@@ -45,7 +51,7 @@ void get_and_print_temp(void) {
    
    //G_t_read = GetTemperature();
    Serial.println(G_t_filt); // testing to see if it's just serial interrupts slowing things down. Apparently not. 
-   //Serial.println(time_to_read_temp);
+   Serial.println(time_to_read_temp);
    
    //Serial.println(time_temp_reader.last_time());
    //Serial.println(micros());
@@ -99,14 +105,15 @@ void setup() {
   // use Arduino pins 
   pinMode(vccPin, OUTPUT); digitalWrite(vccPin, HIGH);
   pinMode(gndPin, OUTPUT); digitalWrite(gndPin, LOW);
+  pinMode(P_LGND, OUTPUT); digitalWrite(P_LGND, LOW);
+  pinMode(P_RED, OUTPUT); digitalWrite(P_RED, HIGH);
+  pinMode(P_GRN, OUTPUT); digitalWrite(P_GRN, HIGH);
+  pinMode(P_BLU, OUTPUT); digitalWrite(P_BLU, HIGH);
   
   pinMode(thermoCS,OUTPUT); // MAX6675/6674 /CS Line must be an output for hardware SPI
   digitalWrite(thermoCS,HIGH); // Set MAX7765 /CS High
 
-  SPI.begin(); // Init SPI
-  SPI.setBitOrder(MSBFIRST); // Sets the order of the bits shifted out of and into the SPI bus
-  SPI.setDataMode(SPI_MODE1); // Base value of clock is 1, data is captured on clock's falling edge.
-  SPI.setClockDivider(SPI_CLOCK_DIV32); // Set SPI data rate to 16mhz/4. IE: 4mhz.
+ 
   
   IIR_LAMBDA = 0.5;
   G_t_filt = 25;
@@ -121,6 +128,8 @@ void setup() {
   // wait for MAX chip to stabilize
   delay(500);
   Serial.println("GO!");
+  digitalWrite(P_RED, LOW);
+  digitalWrite(P_BLU, LOW);
 }
 
 void loop() {
